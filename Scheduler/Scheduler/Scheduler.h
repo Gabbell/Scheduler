@@ -1,25 +1,25 @@
 #pragma once
 
 #include <queue>
-#include <iostream>
-#include <string>
 #include <chrono>
 #include "MyProcess.h"
-
-#define MAX_PRIORITY 139
-#define MIN_PRIORITY 0
 
 class Scheduler
 {
 public:
 	Scheduler();
 	void swapQueues();
+	void sortProcessArray(int arraySize);
 	double getCurrentTime();
 
 	~Scheduler();
 private:
+	int const MAX_PRIORITY = 139;
+	int const MIN_PRIORITY = 1;
+
 	std::chrono::high_resolution_clock::time_point startTime;
 	std::queue<MyProcess> queue1; //Initially active queue
 	std::queue<MyProcess> queue2; //Initially expired queue
+	MyProcess* processArray;
 };
 
