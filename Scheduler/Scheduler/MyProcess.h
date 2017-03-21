@@ -1,11 +1,12 @@
 #pragma once
+#include <string>
 class MyProcess
 {
 public:
-	MyProcess();
+	MyProcess(std::string pid, int priority, double arrival_time, double burst_time);
 	~MyProcess();
 private:
-	int pid;
+	std::string pid;
 	int priority;
 	double arrival_time;
 	double burst_time;

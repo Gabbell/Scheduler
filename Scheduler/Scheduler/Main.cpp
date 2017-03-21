@@ -1,14 +1,15 @@
 #include <iostream>
 #include <string>
+#include "Scheduler.h"
 
 using namespace std;
 
 int main() {
 
-	cout << "Hi Mom!" << endl;
+	Scheduler scheduler;
 
-	string in;
-	cin >> in;
+	scheduler.getCurrentTime();
 
+	system("pause");
 	return 0;
 }
