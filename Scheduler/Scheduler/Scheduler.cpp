@@ -5,21 +5,21 @@
 
 Scheduler::Scheduler()
 {
-	
+
 	std::cout << "Please enter the name of the input file: " << std::endl;
 	std::string fileName;
 	std::cin >> fileName;
-	
+
 	std::ifstream ifs;
 	ifs.open(fileName);
 
 	//Waiting until file is found an open. Otherwise, prompt user again
-	while(!ifs){
+	while (!ifs) {
 		std::cout << "Could not find file. Try again" << std::endl;
 		std::cin >> fileName;
 		ifs.open(fileName);
 	}
-	
+
 	int arraySize;
 	ifs >> arraySize;
 
@@ -28,23 +28,26 @@ Scheduler::Scheduler()
 	std::cout << "----------STARTING SEQUENCE----------" << std::endl;
 	for (int i = 0; i < arraySize; i++) {
 		std::string pid;
-		int priority;
 		int arrival_time;
 		int burst_time;
+		int priority;
 
 		ifs >> pid;
 		ifs >> arrival_time;
 		ifs >> burst_time;
 		ifs >> priority;
 
-		processArray[i] = MyProcess(pid, priority, arrival_time, burst_time);
+		if (priority >= MINI_PRIORITY  && priority <= MAXI_PRIORITY) {
+			processArray[i] = MyProcess(pid, arrival_time, burst_time, priority);
+		}
+		else {
+			std::cout << "Process " << pid << " does not have a valid priority. Skipping..." << std::endl;
+		}
 	}
 
 	sortProcessArray(arraySize);
-	
+	printProcesses(arraySize);
 	ifs.close();
-
-	startTime = std::chrono::high_resolution_clock::now();
 }
 
 void Scheduler::sortProcessArray(int arraySize) {
@@ -53,6 +56,7 @@ void Scheduler::sortProcessArray(int arraySize) {
 
 	for (int i = 0; i < arraySize; i++) {
 		for (int j = 0; j < arraySize; j++) {
+			//Sorting by arrival time
 			if (processArray[j].getArrivalTime() > processArray[init].getArrivalTime()) {
 				init = j;
 			}
@@ -64,16 +68,10 @@ void Scheduler::sortProcessArray(int arraySize) {
 	return;
 }
 
-double Scheduler::getCurrentTime() {
-
-	using namespace std::chrono;
-	high_resolution_clock::time_point endTime = high_resolution_clock::now();
-
-	//Calculating time span between constructor starTime and now
-	duration<double> time_span = duration_cast<duration<double>>(endTime - startTime);
-
-	//Return in ms
-	return time_span.count() * 1000;
+void Scheduler::printProcesses(int arraySize) {
+	for (int i = 0; i < arraySize; i++) {
+		std::cout << processArray[i].getPid() << " " << processArray[i].getArrivalTime() << " " << processArray[i].getBurstTime() << " " << processArray[i].getPriority() << std::endl;
+	}
 }
 
 void Scheduler::swapQueues() {
