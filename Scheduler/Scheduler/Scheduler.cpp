@@ -20,13 +20,12 @@ Scheduler::Scheduler()
 		ifs.open(fileName);
 	}
 
-	int arraySize;
-	ifs >> arraySize;
+	ifs >> m_arraySize;
 
-	processArray = new MyProcess[arraySize];
+	processArray = new MyProcess[m_arraySize];
 
-	std::cout << "----------STARTING SEQUENCE----------" << std::endl;
-	for (int i = 0; i < arraySize; i++) {
+	//Parsing input file
+	for (int i = 0; i < m_arraySize; i++) {
 		std::string pid;
 		int arrival_time;
 		int burst_time;
@@ -45,8 +44,11 @@ Scheduler::Scheduler()
 		}
 	}
 
-	sortProcessArray(arraySize);
-	printProcesses(arraySize);
+	sortProcessArray(m_arraySize);
+
+	std::cout << "----------SORTED PROCESSES----------" << std::endl;
+	printProcesses(m_arraySize);
+
 	ifs.close();
 }
 
@@ -57,13 +59,12 @@ void Scheduler::sortProcessArray(int arraySize) {
 	for (int i = 0; i < arraySize; i++) {
 		for (int j = 0; j < arraySize; j++) {
 			//Sorting by arrival time
-			if (processArray[j].getArrivalTime() > processArray[init].getArrivalTime()) {
-				init = j;
+			if (processArray[j].getArrivalTime() < processArray[init].getArrivalTime()) {
+				temp = processArray[init];
+				processArray[init] = processArray[i];
+				processArray[i] = temp;
 			}
 		}
-		temp = processArray[init];
-		processArray[init] = processArray[i];
-		processArray[i] = temp;
 	}
 	return;
 }
@@ -75,7 +76,8 @@ void Scheduler::printProcesses(int arraySize) {
 }
 
 void Scheduler::swapQueues() {
-	std::swap(queue1, queue2);
+	//Swapping flags
+	m_isActive = !m_isActive;
 }
 
 Scheduler::~Scheduler()
