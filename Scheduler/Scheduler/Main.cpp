@@ -19,12 +19,11 @@ double getCurrentTime(HRClock::time_point startTime, HRClock::time_point endTime
 DWORD WINAPI dummyRoutine(LPVOID p) {
 	double* timeSlot = (double*)(p);
 
-
 	delete timeSlot;
 	return 0;
 }
 
-DWORD WINAPI overwatchRoutine() {
+DWORD WINAPI overwatchRoutine(LPVOID p) {
 	Scheduler scheduler;
 
 	std::cout << "----------STARTING SEQUENCE----------" << std::endl;
@@ -32,7 +31,7 @@ DWORD WINAPI overwatchRoutine() {
 	//Casting parameter to right type
 	scheduler.setStartTime(HRClock::now());
 
-	void(*dummyRoutine) = &dummyRoutine;
+	DWORD(WINAPI *dumbRoutine)(LPVOID) = &dummyRoutine;
 	int procIndex = 0;
 
 	while (!scheduler.getQueue1().empty() || !scheduler.getQueue1().empty() || procIndex < scheduler.getArraySize()) {
@@ -56,7 +55,7 @@ DWORD WINAPI overwatchRoutine() {
 			HANDLE t_dummy = CreateThread(
 				NULL,					
 				0,		
-				(LPTHREAD_START_ROUTINE)dummyRoutine,
+				(LPTHREAD_START_ROUTINE)dumbRoutine,
 				timeSlot,	
 				0,										
 				NULL);
@@ -94,7 +93,7 @@ DWORD WINAPI overwatchRoutine() {
 int main() {
 
 	//Create Overwatch thread
-	void(*ow_routine) = &overwatchRoutine;
+	DWORD(WINAPI *ow_routine)(LPVOID) = &overwatchRoutine;
 
 	HANDLE t_overwatch = CreateThread(
 		NULL,										//Default security attributes
