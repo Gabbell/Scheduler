@@ -1,7 +1,7 @@
 #include "Scheduler.h"
 #include <iostream>
-#include <fstream>
 #include <string>
+#include <fstream>
 
 Scheduler::Scheduler()
 {
@@ -13,7 +13,7 @@ Scheduler::Scheduler()
 	std::ifstream ifs;
 	ifs.open(fileName);
 
-	//Waiting until file is found an open. Otherwise, prompt user again
+	//Waiting until file is found and open. Otherwise, prompt user again
 	while (!ifs) {
 		std::cout << "Could not find file. Try again" << std::endl;
 		std::cin >> fileName;

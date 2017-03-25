@@ -1,0 +1,3 @@
+Time 1000, P1, Arrived
+Time 2000, P2, Arrived
+Time 3200, P3, Arrived

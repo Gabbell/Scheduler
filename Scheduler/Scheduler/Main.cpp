@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <Windows.h>
 #include "Scheduler.h"
@@ -17,14 +18,20 @@ double getCurrentTime(HRClock::time_point startTime, HRClock::time_point endTime
 }
 
 DWORD WINAPI dummyRoutine(LPVOID p) {
-	double* timeSlot = (double*)(p);
+	HRClock::time_point t_start = HRClock::now();
+	double* burstTime = (double*)(p);
 
-	delete timeSlot;
+	//Busy waiting
+	while (getCurrentTime(t_start, HRClock::now()) < *burstTime);
+
+	std::cout << "Previous process terminated" << std::endl;
+
 	return 0;
 }
 
 DWORD WINAPI overwatchRoutine(LPVOID p) {
 	Scheduler scheduler;
+	std::ofstream ofs = std::ofstream("output.txt", std::ofstream::out);
 
 	std::cout << "----------STARTING SEQUENCE----------" << std::endl;
 
@@ -36,30 +43,35 @@ DWORD WINAPI overwatchRoutine(LPVOID p) {
 
 	while (!scheduler.getQueue1().empty() || !scheduler.getQueue1().empty() || procIndex < scheduler.getArraySize()) {
 
+		double timeNow = getCurrentTime(scheduler.getStartTime(), HRClock::now());
 		//If process has arrived, add it to the queue and create initially suspended thread
-		if (getCurrentTime(scheduler.getStartTime(), HRClock::now()) >= scheduler.getProcess(procIndex).getArrivalTime() 
+		if (timeNow >= scheduler.getProcess(procIndex).getArrivalTime() 
 			&& procIndex < scheduler.getArraySize()) {
-			std::cout << "Process " << scheduler.getProcess(procIndex).getPid() << " arrived" << std::endl;
+
+			MyProcess currentProc = scheduler.getProcess(procIndex);
+			ofs << "Time " << timeNow << ", " << currentProc.getPid() << ", Arrived" << std::endl;
+			std::cout << "Time " << currentProc.getPid() << " arrived" << std::endl;
 
 			//Calculating time slot
-			int priority = scheduler.getProcess(procIndex).getPriority();
-			double* timeSlot = nullptr;
+			int priority = currentProc.getPriority();
+			double timeSlot;
 
 			if (priority < 100) {
-				timeSlot = new double((140 - priority) * 20);
+				timeSlot = (140 - priority) * 20;
 			}
 			else {
-				timeSlot = new double((140 - priority) * 5);
+				timeSlot = (140 - priority) * 5;
 			}
 
+			double burstTime = currentProc.getBurstTime();
 			HANDLE t_dummy = CreateThread(
 				NULL,					
 				0,		
 				(LPTHREAD_START_ROUTINE)dumbRoutine,
-				timeSlot,	
+				&burstTime,	
 				0,										
 				NULL);
-			scheduler.getProcess(procIndex).setHandle(t_dummy);
+			currentProc.setHandle(t_dummy);
 			
 			//Pushing new process into the expired queue
 			if (scheduler.getIsActive()) {
@@ -84,8 +96,6 @@ DWORD WINAPI overwatchRoutine(LPVOID p) {
 			}
 		}
 	}
-
-	system("pause");
 
 	return 0;
 }

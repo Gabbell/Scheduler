@@ -21,6 +21,9 @@ public:
 	void setHandle(HANDLE t_handle) {
 		m_handle = t_handle;
 	}
+	HANDLE getHandle() {
+		return m_handle;
+	}
 	~MyProcess();
 private:
 	std::string m_pid;
