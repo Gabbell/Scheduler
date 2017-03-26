@@ -148,6 +148,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			}
 			else if (getCurrentTime(m_timeSlotCounter, HRClock::now()) >= m_currentProcess->getTimeSlot()) {
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
+				SuspendThread(m_currentProcess->getHandle());
 				getExpiredQueue().push(m_currentProcess);
 
 				m_servingProcess = false;
