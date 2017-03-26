@@ -44,7 +44,7 @@ DWORD WINAPI overwatchRoutine(LPVOID p) {
 	while (!scheduler.getQueue1().empty() || !scheduler.getQueue1().empty() || procIndex < scheduler.getArraySize()) {
 
 		double timeNow = getCurrentTime(scheduler.getStartTime(), HRClock::now());
-		//If process has arrived, add it to the queue and create initially suspended thread
+		//If process has arrived, add it to the queue and create thread
 		if (timeNow >= scheduler.getProcess(procIndex).getArrivalTime() 
 			&& procIndex < scheduler.getArraySize()) {
 
@@ -54,6 +54,12 @@ DWORD WINAPI overwatchRoutine(LPVOID p) {
 
 			//Calculating time slot
 			int priority = currentProc.getPriority();
+
+			//Updating priority if necessary
+			if (currentProc.getTsCount() % 2 == 0 && currentProc.getTsCount() > 1) {
+
+				//TODO
+			}
 			double timeSlot;
 
 			if (priority < 100) {

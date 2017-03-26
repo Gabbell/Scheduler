@@ -18,8 +18,17 @@ public:
 	int getPriority() const {
 		return m_priority;
 	}
+	void setPriority(int priority) {
+		m_priority = priority;
+	}
 	void setHandle(HANDLE t_handle) {
 		m_handle = t_handle;
+	}
+	void incrementTS() {
+		ts_counter++;
+	}
+	int getTsCount() {
+		return ts_counter;
 	}
 	HANDLE getHandle() {
 		return m_handle;
@@ -27,6 +36,7 @@ public:
 	~MyProcess();
 private:
 	std::string m_pid;
+	int ts_counter;
 	int m_priority;
 	double m_arrival_time;
 	double m_burst_time;
