@@ -129,6 +129,8 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				m_servingProcess = true;
 				m_timeSlotCounter = HRClock::now();
 
+				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << ((m_currentProcess->isNew()) ? "Started, " : "Resumed, ")
+					<< "Granted " << m_currentProcess->getTimeSlot() << std::endl;
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << ((m_currentProcess->isNew()) ? "Started, " : "Resumed, ")
 					<< "Granted " << m_currentProcess->getTimeSlot() << std::endl;
 
@@ -140,6 +142,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 		else {
 			// Check if current process is terminated or if its timeslot is finished
 			if (m_currentProcess->isTerminated()) {
+				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Terminated" << std::endl;
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Terminated" << std::endl;
 				
 				m_servingProcess = false;
@@ -148,6 +151,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			}
 			else if (getCurrentTime(m_timeSlotCounter, HRClock::now()) >= m_currentProcess->getTimeSlot()) {
 				SuspendThread(m_currentProcess->getHandle());
+				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
 				
 				m_currentProcess->incrementTimeSlotCount();
@@ -155,6 +159,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				if (m_currentProcess->getTimeSlotCount() % 2 == 0 && m_currentProcess->getTimeSlotCount() > 1) {
 					int bonus = floor(10 * m_currentProcess->getTotalWaitTime() / (timeNow - m_currentProcess->getArrivalTime()));
 					m_currentProcess->setPriority(max(100, min(m_currentProcess->getPriority() - bonus + 5, SCHEDULER_MAX_PRIORITY)));
+					ofs <<  "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "priority updated to " << m_currentProcess->getPriority() << std::endl;
 					std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "priority updated to " << m_currentProcess->getPriority() << std::endl;
 				}
 				
