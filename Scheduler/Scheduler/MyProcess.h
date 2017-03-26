@@ -61,6 +61,10 @@ public:
 		return m_handle;
 	}
 	
+	double getTotalWaitTime() const {
+		return m_totalWaitTime;
+	}
+
 	void setWaitTimeCounter(HRClock::time_point waitTimeCounter) {
 		m_waitTimeCounter = waitTimeCounter;
 	}

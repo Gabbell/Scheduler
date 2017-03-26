@@ -10,7 +10,7 @@ bool compare(MyProcess* a, MyProcess* b) {
 Scheduler::Scheduler() : m_servingProcess(false), m_timeSlotCounter(HRClock::now()), queue1(compare), queue2(compare)
 {
 
-	std::cout << "Please enter the name of the input file: " << std::endl;
+	std::cout << "Please enter the name of the input file: ";
 	std::string fileName;
 	std::cin >> fileName;
 
@@ -118,8 +118,6 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			if (!getActiveQueue().empty()) {
 				m_currentProcess = getActiveQueue().top();
 
-				getActiveQueue().pop();
-
 				m_currentProcess->incrementTotalWaitTime();
 
 				//Updating priority if necessary
@@ -145,11 +143,23 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Terminated" << std::endl;
 				
 				m_servingProcess = false;
+
+				getActiveQueue().pop();
 			}
 			else if (getCurrentTime(m_timeSlotCounter, HRClock::now()) >= m_currentProcess->getTimeSlot()) {
-				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
 				SuspendThread(m_currentProcess->getHandle());
+				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
+				
+				m_currentProcess->incrementTimeSlotCount();
+
+				if (m_currentProcess->getTimeSlotCount() % 2 == 0 && m_currentProcess->getTimeSlotCount() > 1) {
+					int bonus = floor(10 * m_currentProcess->getTotalWaitTime() / (timeNow - m_currentProcess->getArrivalTime()));
+					m_currentProcess->setPriority(max(100, min(m_currentProcess->getPriority() - bonus + 5, SCHEDULER_MAX_PRIORITY)));
+					std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "priority updated to " << m_currentProcess->getPriority() << std::endl;
+				}
+				
 				getExpiredQueue().push(m_currentProcess);
+				getActiveQueue().pop();
 
 				m_servingProcess = false;
 			}
