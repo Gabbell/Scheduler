@@ -19,6 +19,8 @@ private:
 	HRClock::time_point m_waitTimeCounter;
 	double m_totalWaitTime;
 
+
+
 	bool m_terminated;
 	bool m_new;
 public:

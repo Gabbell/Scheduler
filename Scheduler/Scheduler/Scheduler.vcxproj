@@ -113,10 +113,12 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MyProcess.cpp" />
     <ClCompile Include="Scheduler.cpp" />
+    <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyProcess.h" />
     <ClInclude Include="Scheduler.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

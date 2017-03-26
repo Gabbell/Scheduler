@@ -3,6 +3,8 @@
 #include <string>
 #include <fstream>
 
+#include "Timer.h"
+
 bool compare(MyProcess* a, MyProcess* b) {
 	return ((*a) > (*b));
 }
@@ -81,7 +83,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			//Calculating time slot
 			int priority = currentProc.getPriority();
 
-			double timeSlot;
+			double timeSlot = 0;
 
 			if (priority < 100) {
 				timeSlot = (140 - priority) * 20;
@@ -159,8 +161,20 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				if (m_currentProcess->getTimeSlotCount() % 2 == 0 && m_currentProcess->getTimeSlotCount() > 1) {
 					int bonus = floor(10 * m_currentProcess->getTotalWaitTime() / (timeNow - m_currentProcess->getArrivalTime()));
 					m_currentProcess->setPriority(max(100, min(m_currentProcess->getPriority() - bonus + 5, SCHEDULER_MAX_PRIORITY)));
+
 					ofs <<  "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "priority updated to " << m_currentProcess->getPriority() << std::endl;
 					std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "priority updated to " << m_currentProcess->getPriority() << std::endl;
+
+					double timeSlot = 0;
+
+					if (m_currentProcess->getPriority() < 100) {
+						timeSlot = (140 - m_currentProcess->getPriority()) * 20;
+					}
+					else {
+						timeSlot = (140 - m_currentProcess->getPriority()) * 5;
+					}
+
+					m_currentProcess->setTimeSlot(timeSlot);
 				}
 				
 				getExpiredQueue().push(m_currentProcess);

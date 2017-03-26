@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include "Scheduler.h"
 
+#include "Timer.h"
+
 using namespace std;
 
 double getCurrentTime(HRClock::time_point startTime, HRClock::time_point endTime) {
@@ -21,8 +23,10 @@ DWORD WINAPI dummyRoutine(LPVOID p) {
 	HRClock::time_point t_start = HRClock::now();
 	MyProcess* process = (MyProcess*)(p);
 
+	Timer timer(process->getBurstTime());
+
 	//Busy waiting
-	while (getCurrentTime(t_start, HRClock::now()) < process->getBurstTime());
+	while (getCurrentTime(t_start, HRClock::now()) - process->getTotalWaitTime() < process->getBurstTime());
 
 	//std::cout << "Previous process terminated" << std::endl;
 	process->terminate();
