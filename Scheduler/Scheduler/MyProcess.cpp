@@ -16,7 +16,7 @@ MyProcess::~MyProcess()
 }
 
 bool MyProcess::operator>(const MyProcess& proc) const {
-	return (m_pid > proc.getPid());
+	return (m_priority > proc.getPriority());
 }
 
 double getCurrentTime(HRClock::time_point startTime, HRClock::time_point endTime);
