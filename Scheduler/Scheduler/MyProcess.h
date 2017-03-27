@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <Windows.h>
 #include <chrono>
@@ -21,7 +22,6 @@ private:
 	HRClock::time_point m_started_at;
 	
 	double m_totalWaitTime;
-	double m_totalRunTime;
 
 
 	bool m_terminated;
@@ -29,7 +29,21 @@ private:
 public:
 	MyProcess();
 	MyProcess(std::string pid, double arrival_time, double burst_time, int priority);
-	
+	~MyProcess();
+
+	void terminate() {
+		m_terminated = true;
+	}
+
+	void incrementTimeSlotCount() {
+		m_timeSlotCount++;
+	}
+
+
+	// Operators
+	bool operator>(const MyProcess& proc) const;
+
+	// Getters
 	std::string getPid() const {
 		return m_pid;
 	}
@@ -45,18 +59,6 @@ public:
 	int getPriority() const {
 		return m_priority;
 	}
-	
-	void setPriority(int priority) {
-		m_priority = priority;
-	}
-	
-	void setHandle(HANDLE t_handle) {
-		m_handle = t_handle;
-	}
-
-	void setTimeSlot(double timeSlot) {
-		m_timeSlot = timeSlot;
-	}
 
 	double getTimeSlot() const {
 		return m_timeSlot;
@@ -70,19 +72,6 @@ public:
 		return m_totalWaitTime;
 	}
 
-	void setPausedAt(HRClock::time_point pausedAt) {
-		m_paused_at = pausedAt;
-	}
-	void setStartedAt(HRClock::time_point startedAt) {
-		m_started_at = startedAt;
-	}
-
-	void incrementTotalWaitTime() {
-		using namespace std::chrono;
-
-		m_totalWaitTime += duration_cast<duration<double>>(m_started_at - m_paused_at).count() * 1000;
-	}
-
 	HRClock::time_point getPausedAt() const {
 		return m_paused_at;
 	}
@@ -90,34 +79,44 @@ public:
 		return m_started_at;
 	}
 
-	double getTotalRunTime() const {
-		return m_totalRunTime;
-	}
-	~MyProcess();
-
-	bool operator>(const MyProcess& proc) const;
-
 	bool isNew() const {
 		return m_new;
 	}
 
-	void setNew(bool isNew) {
-		m_new = isNew;
-	}
-
 	bool isTerminated() const {
 		return m_terminated;
-	}
-	void terminate() {
-		m_terminated = true;
 	}
 
 	int getTimeSlotCount() const {
 		return m_timeSlotCount;
 	}
 
-	void incrementTimeSlotCount() {
-		m_timeSlotCount++;
+	// Setters
+	void setPriority(int priority) {
+		m_priority = priority;
+	}
+
+	void setHandle(HANDLE t_handle) {
+		m_handle = t_handle;
+	}
+
+	void setTimeSlot(double timeSlot) {
+		m_timeSlot = timeSlot;
+	}
+
+	void setPausedAt(HRClock::time_point pausedAt) {
+		m_paused_at = pausedAt;
+	}
+	void setStartedAt(HRClock::time_point startedAt) {
+		using namespace std::chrono;
+		m_started_at = startedAt;
+		
+		if (!isNew())
+			m_totalWaitTime += duration_cast<duration<double>>(m_started_at - m_paused_at).count() * 1000;
+	}
+	
+	void setNew(bool isNew) {
+		m_new = isNew;
 	}
 };
 

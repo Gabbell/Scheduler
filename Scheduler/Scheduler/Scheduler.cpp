@@ -3,12 +3,12 @@
 #include <string>
 #include <fstream>
 
+// Function used to sort priority queues
 bool compare(MyProcess* a, MyProcess* b) {
 	return ((*a) > (*b));
 }
 
-Scheduler::Scheduler() : m_servingProcess(false), m_timeSlotCounter(HRClock::now()), queue1(compare), queue2(compare)
-{
+Scheduler::Scheduler() : m_servingProcess(false), m_timeSlotCounter(HRClock::now()), queue1(compare), queue2(compare) {
 
 	std::cout << "Please enter the name of the input file: ";
 	std::string fileName;
@@ -56,6 +56,10 @@ Scheduler::Scheduler() : m_servingProcess(false), m_timeSlotCounter(HRClock::now
 	ifs.close();
 }
 
+Scheduler::~Scheduler() {
+	delete[] processArray;
+}
+
 double getCurrentTime(HRClock::time_point startTime, HRClock::time_point endTime);
 
 void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
@@ -65,12 +69,15 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 
 	setStartTime(HRClock::now());
 
+	// Index for the first process to arrive, if this index is >= number of processes then all processes have arrived
 	int procIndex = 0;
 
+	// Run scheduler until both queues are empty, all processes have arrived, and no process is currently being executed
 	while (!getActiveQueue().empty() || !getExpiredQueue().empty() || procIndex < getArraySize() || m_servingProcess) {
 
 		double timeNow = getCurrentTime(getStartTime(), HRClock::now());
-		//If process has arrived, add it to the queue and create thread
+		
+		// If process has arrived, add it to the queue and create thread
 		if (timeNow >= getProcess(procIndex).getArrivalTime() && procIndex < getArraySize()) {
 
 			MyProcess& currentProc = getProcess(procIndex);
@@ -78,7 +85,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			ofs << "Time " << timeNow << ", " << currentProc.getPid() << ", Arrived" << std::endl;
 			std::cout << "Time " << timeNow << ", " << currentProc.getPid() << ", Arrived" << std::endl;
 
-			//Calculating time slot
+			// Calculate initial time slot
 			int priority = currentProc.getPriority();
 
 			double timeSlot = 0;
@@ -89,17 +96,12 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			else {
 				timeSlot = (140 - priority) * 5;
 			}
+
 			currentProc.setTimeSlot(timeSlot);
 			currentProc.setPausedAt(HRClock::now());
-
-			double burstTime = currentProc.getBurstTime();
-			HANDLE t_dummy = CreateThread(
-				NULL,
-				0,
-				dummyRoutine,
-				&currentProc,
-				CREATE_SUSPENDED,
-				NULL);
+			
+			HANDLE t_dummy = CreateThread( NULL, 0, dummyRoutine, &currentProc, CREATE_SUSPENDED, NULL);
+			
 			currentProc.setHandle(t_dummy);
 
 			//Pushing new process into the expired queue
@@ -108,7 +110,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			procIndex++;
 		}
 
-		//Swapping queues
+		// If active queue is empty, swapping queues
 		if (getActiveQueue().empty()) {
 			swapQueues();
 		}
@@ -122,9 +124,6 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				m_timeSlotCounter = HRClock::now();
 
 				m_currentProcess->setStartedAt(HRClock::now());
-				if (!m_currentProcess->isNew()) {
-					m_currentProcess->incrementTotalWaitTime();
-				}
 
 				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << ((m_currentProcess->isNew()) ? "Started, " : "Resumed, ")
 					<< "Granted " << m_currentProcess->getTimeSlot() << std::endl;
@@ -137,7 +136,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			}
 		}
 		else {
-			// Check if current process is terminated or if its timeslot is finished
+			// Check if current process is terminated
 			if (m_currentProcess->isTerminated()) {
 				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Terminated" << std::endl;
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Terminated" << std::endl;
@@ -146,6 +145,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 
 				getActiveQueue().pop();
 			}
+			// Else check if current process's timeslot has expired
 			else if (getCurrentTime(m_timeSlotCounter, HRClock::now()) >= m_currentProcess->getTimeSlot()) {
 				
 				m_currentProcess->setPausedAt(HRClock::now());
@@ -157,8 +157,10 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				
 				m_currentProcess->incrementTimeSlotCount();
 
+				// Recalculate priority and time slot if needed
 				if (m_currentProcess->getTimeSlotCount() % 2 == 0 && m_currentProcess->getTimeSlotCount() > 1) {
-					int bonus = floor(10 * m_currentProcess->getTotalWaitTime() / (timeNow - m_currentProcess->getArrivalTime()));
+					
+					double bonus = floor(10 * m_currentProcess->getTotalWaitTime() / (timeNow - m_currentProcess->getArrivalTime()));
 					m_currentProcess->setPriority(max(100, min(m_currentProcess->getPriority() - bonus + 5, SCHEDULER_MAX_PRIORITY)));
 
 					ofs <<  "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "priority updated to " << m_currentProcess->getPriority() << std::endl;
@@ -184,6 +186,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 		}
 	}
 
+	ofs.close();
 	std::cout << "----------FINISHED----------" << std::endl;
 }
 
@@ -212,9 +215,4 @@ void Scheduler::printProcesses(int arraySize) {
 	for (int i = 0; i < arraySize; i++) {
 		std::cout << processArray[i].getPid() << " " << processArray[i].getArrivalTime() << " " << processArray[i].getBurstTime() << " " << processArray[i].getPriority() << std::endl;
 	}
-}
-
-Scheduler::~Scheduler()
-{
-	delete[] processArray;
 }

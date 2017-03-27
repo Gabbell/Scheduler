@@ -24,7 +24,7 @@ DWORD WINAPI dummyRoutine(LPVOID p) {
 	//Busy waiting
 	while (getCurrentTime(t_start, HRClock::now()) - process->getTotalWaitTime() < process->getBurstTime());
 
-	//std::cout << "Previous process terminated" << std::endl;
+	// Terminate process
 	process->terminate();
 
 	return 0;
@@ -54,7 +54,7 @@ int main() {
 
 	WaitForSingleObject(t_overwatch, INFINITE);
 
-	system("pause");
+	// system("pause"); // Used for testing
 
 	return 0;
 }
