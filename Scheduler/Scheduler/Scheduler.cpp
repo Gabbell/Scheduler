@@ -122,6 +122,9 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				m_timeSlotCounter = HRClock::now();
 
 				m_currentProcess->setStartedAt(HRClock::now());
+				if (!m_currentProcess->isNew()) {
+					m_currentProcess->incrementTotalWaitTime();
+				}
 
 				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << ((m_currentProcess->isNew()) ? "Started, " : "Resumed, ")
 					<< "Granted " << m_currentProcess->getTimeSlot() << std::endl;
@@ -144,8 +147,11 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				getActiveQueue().pop();
 			}
 			else if (getCurrentTime(m_timeSlotCounter, HRClock::now()) >= m_currentProcess->getTimeSlot()) {
+				
 				m_currentProcess->setPausedAt(HRClock::now());
+				
 				SuspendThread(m_currentProcess->getHandle());
+				
 				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
 				
