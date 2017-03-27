@@ -39,23 +39,6 @@ public:
 		m_queuesSwapped = !m_queuesSwapped;
 	}
 
-	HRClock::time_point getStartTime() {
-		return m_startTime;
-	}
-	
-	void setStartTime(HRClock::time_point startTime) {
-		m_startTime = startTime;
-	}
-
-	std::priority_queue<MyProcess*, std::vector<MyProcess*>, bool(*)(MyProcess*, MyProcess*)>& getActiveQueue() {
-		return (m_queuesSwapped) ? queue1 : queue2;
-	}
-
-	std::priority_queue<MyProcess*, std::vector<MyProcess*>, bool(*)(MyProcess*, MyProcess*)>& getExpiredQueue() {
-		return (m_queuesSwapped) ? queue2 : queue1;
-	}
-
-
 	// Getters
 	MyProcess& getProcess(int index){
 		return processArray[index];
@@ -67,9 +50,22 @@ public:
 		return m_queuesSwapped;
 	}
 
+	HRClock::time_point getStartTime() {
+		return m_startTime;
+	}
+
+
+	std::priority_queue<MyProcess*, std::vector<MyProcess*>, bool(*)(MyProcess*, MyProcess*)>& getActiveQueue() {
+		return (m_queuesSwapped) ? queue1 : queue2;
+	}
+
+	std::priority_queue<MyProcess*, std::vector<MyProcess*>, bool(*)(MyProcess*, MyProcess*)>& getExpiredQueue() {
+		return (m_queuesSwapped) ? queue2 : queue1;
+	}
+
 	// Setters
-	void setIsActive(bool isActive) {
-		m_queuesSwapped = isActive;
+	void setStartTime(HRClock::time_point startTime) {
+		m_startTime = startTime;
 	}
 };
 
