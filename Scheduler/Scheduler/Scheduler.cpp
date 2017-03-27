@@ -3,8 +3,6 @@
 #include <string>
 #include <fstream>
 
-#include "Timer.h"
-
 bool compare(MyProcess* a, MyProcess* b) {
 	return ((*a) > (*b));
 }
@@ -92,7 +90,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				timeSlot = (140 - priority) * 5;
 			}
 			currentProc.setTimeSlot(timeSlot);
-			currentProc.setWaitTimeCounter(HRClock::now());
+			currentProc.setPausedAt(HRClock::now());
 
 			double burstTime = currentProc.getBurstTime();
 			HANDLE t_dummy = CreateThread(
@@ -120,16 +118,10 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 			if (!getActiveQueue().empty()) {
 				m_currentProcess = getActiveQueue().top();
 
-				m_currentProcess->incrementTotalWaitTime();
-
-				//Updating priority if necessary
-				//if (m_currentProcess.getTimeSlotCount() % 2 == 0 && m_currentProcess.getTimeSlotCount() > 1) {
-
-				//TODO
-				//}
-
 				m_servingProcess = true;
 				m_timeSlotCounter = HRClock::now();
+
+				m_currentProcess->setStartedAt(HRClock::now());
 
 				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << ((m_currentProcess->isNew()) ? "Started, " : "Resumed, ")
 					<< "Granted " << m_currentProcess->getTimeSlot() << std::endl;
@@ -152,6 +144,7 @@ void Scheduler::run(DWORD(WINAPI *dummyRoutine)(LPVOID)) {
 				getActiveQueue().pop();
 			}
 			else if (getCurrentTime(m_timeSlotCounter, HRClock::now()) >= m_currentProcess->getTimeSlot()) {
+				m_currentProcess->setPausedAt(HRClock::now());
 				SuspendThread(m_currentProcess->getHandle());
 				ofs << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;
 				std::cout << "Time " << timeNow << ", " << m_currentProcess->getPid() << ", " << "Paused" << std::endl;

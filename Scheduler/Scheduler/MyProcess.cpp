@@ -20,7 +20,3 @@ bool MyProcess::operator>(const MyProcess& proc) const {
 }
 
 double getCurrentTime(HRClock::time_point startTime, HRClock::time_point endTime);
-
-void MyProcess::incrementTotalWaitTime() {
-	m_totalWaitTime += getCurrentTime(m_waitTimeCounter, HRClock::now());
-}

@@ -2,6 +2,7 @@
 #include <string>
 #include <Windows.h>
 #include <chrono>
+#include <iostream>
 
 typedef std::chrono::high_resolution_clock HRClock;
 
@@ -16,7 +17,8 @@ private:
 	double m_burst_time;
 	HANDLE m_handle;
 
-	HRClock::time_point m_waitTimeCounter;
+	HRClock::time_point m_paused_at;
+	HRClock::time_point m_started_at;
 	double m_totalWaitTime;
 
 
@@ -67,12 +69,19 @@ public:
 		return m_totalWaitTime;
 	}
 
-	void setWaitTimeCounter(HRClock::time_point waitTimeCounter) {
-		m_waitTimeCounter = waitTimeCounter;
+	void setPausedAt(HRClock::time_point pausedAt) {
+		m_paused_at = pausedAt;
 	}
-
-	HRClock::time_point getWaitTimeCounter() const {
-		return m_waitTimeCounter;
+	void setStartedAt(HRClock::time_point startedAt) {
+		using namespace std::chrono;
+		m_started_at = startedAt;
+		m_totalWaitTime += duration_cast<duration<double>>(m_started_at - m_paused_at).count()*1000;
+	}
+	HRClock::time_point getPausedAt() const {
+		return m_paused_at;
+	}
+	HRClock::time_point getStartedAt() const {
+		return m_started_at;
 	}
 
 	~MyProcess();
@@ -101,7 +110,5 @@ public:
 	void incrementTimeSlotCount() {
 		m_timeSlotCount++;
 	}
-
-	void incrementTotalWaitTime();
 };
 
