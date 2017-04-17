@@ -1,5 +1,5 @@
 # CPU Scheduler
-COEN346 - Operating Systems - Assignment 2 & 3 - CPU Scheduler
+COEN346 - Operating Systems - Assignment 2 - CPU Scheduler
 
 A CPU Scheduler that simulates process scheduling using Windows threads.
 
