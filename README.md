@@ -1,7 +1,7 @@
-# CPU Scheduler with Memory Mangement Unit
-COEN346 - Operating Systems - Assignment 2 & 3 - CPU Scheduler & Memory Management Unit
+# CPU Scheduler
+COEN346 - Operating Systems - Assignment 2 & 3 - CPU Scheduler
 
-A CPU Scheduler with a Memory Management Unit that simulates process scheduling using Windows threads.
+A CPU Scheduler that simulates process scheduling using Windows threads.
 
 ## Requirements
 The goal of this assignment is to successfully create a CPU scheduler that will be preemptive and priority-based. The processes are simulated using threads and the scheduler itself must be able to control the state of these threads. Time slots are given to each thread based on their priorities. This priority is also dynamic based on if two time slots were given previously. For this reason, we used Windows threads because we were able to suspend them if needed and even create them in a suspended state. The preemptive nature of the scheduler will make it so a currently running process can be interrupted by another one. Also, the program should read the instructions from a local file (ifstream) and write the output in a specified format to a text file (ofstream).
